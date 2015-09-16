@@ -1,0 +1,37 @@
+This is HeLL IDE, an IDE for Malbolge and its low-level assembly language HeLL.
+
+You need Qt (version 4.8 or higher) and QScintilla (version 2.6 or higher) to build HeLL IDE.
+You need LMAO (version 0.5 or higher) to assemble, run, and debug your HeLL projects.
+The source files of LMAO v0.5.1 (Windows: LMAO v0.5) are included in this archive.
+However, LMAO must be built seperately.
+
+Go to the src directory and type "qmake", then "make" to build HeLL IDE.
+$ cd src
+$ qmake
+$ make
+
+If you have built HeLL IDE, then type "./hell-ide" to run HeLL IDE.
+Adjust the path to the LMAO binary in the preferences dialog of HeLL IDE.
+
+Features:
+- Text editor with syntax highlighting for HeLL
+- Integrated assembling and running of HeLL programs
+- Debugging of HeLL programs
+
+
+Debugging:
+- Write your HeLL program or load it from a file.
+- Click at Debug->Start to enter the debugging mode.
+- The position of the D register is indicated by a yellow arrow,
+  the position of the C register is indicated by a green arrow
+  (if they point to .DATA or .CODE section).
+- At the right side of the HeLL IDE window, you can
+  enter expressions that will be evaluated by the debugger.
+  Valid expressions are labels of your HeLL program
+  (they will be evaluated to the address they are pointing at),
+  numbers (decimal and ternary), constants: C0, C1, C20, C21, C2, EOF,
+  [expression] (evaluates to the value at memory address described by expression),
+  and arithmetic operations.
+- Press F10 to execute a single malbolge command (don't forget to enter input).
+- Press F5 to run until the next breakpoint.
+
