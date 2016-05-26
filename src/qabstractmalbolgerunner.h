@@ -48,7 +48,7 @@ protected:
     int load_malbolge_program(QString filename);
     int execute_malbolge_step(int &executed_command);
     void char_out(char out);
-    void clear_output_buffer();
+    void clear_output_buffer(bool output_incomplete);
     void set_abort_reading(bool value);
     void set_malbolge_started();
 
@@ -58,7 +58,7 @@ protected:
 
 private:
     QString malbolge_filename;
-    int symbols_printed_since_last_sleep;
+    //int symbols_printed_since_last_sleep;
     QByteArray output_buffer;
     volatile bool abort_reading_flag;
     volatile bool malbolge_started;

@@ -33,6 +33,7 @@ QMalbolgeRunner::QMalbolgeRunner(QString cmd, QStringList arguments, QObject *pa
 int QMalbolgeRunner::execute_malbolge(QString filename) {
 
     this->info(QString("Executing ").append(filename).append("...\n"));
+    int i=0;
 
     int ret = load_malbolge_program(filename);
     if (ret != 0)
@@ -48,7 +49,13 @@ int QMalbolgeRunner::execute_malbolge(QString filename) {
             return step; // ERROR
         else if (step > 0)
             break; // TERMINATED NORMALLY
+        if (++i > 1000000) {
+            i = 0;
+            this->flush_out_buffer();
+        }
     }
+    this->clear_output_buffer(true);
+    this->flush_out_buffer();
     return 0;
 }
 

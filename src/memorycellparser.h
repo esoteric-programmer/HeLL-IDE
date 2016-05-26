@@ -69,7 +69,7 @@ private:
 	static bool get_constant(int &result);
 	static bool get_rotate_operator(bool& result_rotate_right);
 	static bool get_display_separator();
-	static bool get_display_type(enum DisplayType::Type &result_type);
+    static bool get_display_type(enum DisplayType::Type &);
 	static bool get_plusminus(bool &minus);
 	static bool get_muldiv(bool &div);
 	

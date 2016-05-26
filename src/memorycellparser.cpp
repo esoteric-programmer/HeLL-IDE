@@ -184,7 +184,7 @@ bool MemoryCellParser::get_display_separator() {
     return false;
 }
 
-bool MemoryCellParser::get_display_type(enum DisplayType::Type &result_type) {
+bool MemoryCellParser::get_display_type(enum DisplayType::Type&) {
     // TODO
     return false;
 }

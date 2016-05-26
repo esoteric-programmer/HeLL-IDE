@@ -46,6 +46,8 @@ protected:
     bool get_can_read();
     virtual void reading_paused(); // set_can_read wurde auf false gesetzt, während auf Eingabe gewartet wird...
     void clear_inputqueue();
+    void out_buffered(QString);
+    void flush_out_buffer();
 
 private:
     QMutex input_mutex;
@@ -54,6 +56,7 @@ private:
     QMutex thread_mutex;
     QThread* thread;
     QMutex terminate_mutex;
+    QString out_buffer;
     bool terminate;
     bool can_read;
 

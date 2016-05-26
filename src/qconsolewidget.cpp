@@ -101,7 +101,7 @@ void QConsoleWidget::execute(QIOWorker* thread_worker, QString output_on_start) 
 
     connect(this->child_process, SIGNAL(StdErrWrite(QString)), this, SLOT(OnChildStdErrWrite(QString)));
     connect(this->child_process, SIGNAL(InfoWrite(QString)), this, SLOT(OnChildInfoWrite(QString)));
-    connect(this->child_process, SIGNAL(StdOutWrite(QString)), this, SLOT(OnChildStdOutWrite(QString)));
+    connect(this->child_process, SIGNAL(StdOutWrite(QString)), this, SLOT(OnChildStdOutWrite(QString)),Qt::QueuedConnection);
     connect(this->child_process, SIGNAL(Terminated(int,QProcess::ExitStatus)), this, SLOT(OnChildTerminated(int, QProcess::ExitStatus)));
     if (qobject_cast<QMalbolgeDebugger*>(this->child_process)!=0) {
         connect(this->child_process, SIGNAL(clear_userinput()), this, SLOT(clear_userinput()));

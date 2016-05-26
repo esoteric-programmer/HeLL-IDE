@@ -2,8 +2,6 @@ This is HeLL IDE, an IDE for Malbolge and its low-level assembly language HeLL.
 
 You need Qt (version 4.8 or higher) and QScintilla (version 2.6 or higher) to build HeLL IDE.
 You need LMAO (version 0.5 or higher) to assemble, run, and debug your HeLL projects.
-The source files of LMAO v0.5.1 (Windows: LMAO v0.5) are included in this archive.
-However, LMAO must be built seperately.
 
 Go to the src directory and type "qmake", then "make" to build HeLL IDE.
 $ cd src

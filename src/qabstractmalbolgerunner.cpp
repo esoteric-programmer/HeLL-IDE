@@ -50,7 +50,7 @@ int QAbstractMalbolgeRunner::run() {
         if (malbolge_file.length() <= 0)
             return -1;
     }
-    symbols_printed_since_last_sleep = 0;
+    //symbols_printed_since_last_sleep = 0;
     return execute_malbolge(malbolge_file);
 }
 
@@ -89,52 +89,60 @@ unsigned int QAbstractMalbolgeRunner::rotateR(unsigned int d){
 void QAbstractMalbolgeRunner::char_out(char out) {
     this->output_buffer.append(out);
     while (this->output_buffer.size() > 0) {
-        if (symbols_printed_since_last_sleep > 0) {
+        /*if (symbols_printed_since_last_sleep > 0) {
             QSleep::msleep(20);
             symbols_printed_since_last_sleep = 0;
-        }
+        }*/
         if ((this->output_buffer.at(0) & 0x80) == 0) {
-            this->out(QString::fromUtf8(output_buffer.left(1)));
-            symbols_printed_since_last_sleep++;
+            this->out_buffered(QString::fromUtf8(output_buffer.left(1)));
+            //symbols_printed_since_last_sleep++;
             this->output_buffer.remove(0, 1);
         } else if ((this->output_buffer.at(0) & 0x40) == 0) {
             // invalid coding
+            this->flush_out_buffer();
             this->err("[Invalid UTF-8 character]");
-            symbols_printed_since_last_sleep++;
+            //symbols_printed_since_last_sleep++;
             this->output_buffer.remove(0, 1);
         } else if ((this->output_buffer.at(0) & 0x20) == 0) {
             if (this->output_buffer.size() < 2)
                 break;
-            this->out(QString::fromUtf8(output_buffer.left(2)));
-            symbols_printed_since_last_sleep++;
+            this->out_buffered(QString::fromUtf8(output_buffer.left(2)));
+            //symbols_printed_since_last_sleep++;
             this->output_buffer.remove(0, 2);
         } else if ((this->output_buffer.at(0) & 0x10) == 0) {
             if (this->output_buffer.size() < 3)
                 break;
-            this->out(QString::fromUtf8(output_buffer.left(3)));
-            symbols_printed_since_last_sleep++;
+            this->out_buffered(QString::fromUtf8(output_buffer.left(3)));
+            //symbols_printed_since_last_sleep++;
             this->output_buffer.remove(0, 3);
         } else if ((this->output_buffer.at(0) & 0x08) == 0) {
             if (this->output_buffer.size() < 4)
                 break;
-            this->out(QString::fromUtf8(output_buffer.left(4)));
-            symbols_printed_since_last_sleep++;
+            this->out_buffered(QString::fromUtf8(output_buffer.left(4)));
+            //symbols_printed_since_last_sleep++;
             this->output_buffer.remove(0, 4);
         } else {
             // invalid coding
+            this->flush_out_buffer();
             this->err("[Invalid UTF-8 character]");
-            symbols_printed_since_last_sleep++;
+            //symbols_printed_since_last_sleep++;
             this->output_buffer.remove(0, 1);
         }
     }
 }
 
+
 void QAbstractMalbolgeRunner::setMalbolgeFileName(QString filename) {
     this->malbolge_filename = filename;
 }
 
-void QAbstractMalbolgeRunner::clear_output_buffer() {
+void QAbstractMalbolgeRunner::clear_output_buffer(bool output_incomplete) {
+    if (this->output_buffer.size() > 0 && output_incomplete) {
+        this->flush_out_buffer();
+        this->err("[Incomplete UTF-8 character]");
+    }
     this->output_buffer = QByteArray();
+    this->flush_out_buffer();
 }
 
 void QAbstractMalbolgeRunner::set_abort_reading(bool value) {
@@ -142,7 +150,7 @@ void QAbstractMalbolgeRunner::set_abort_reading(bool value) {
 }
 
 int QAbstractMalbolgeRunner::load_malbolge_program(QString filename) {
-    this->clear_output_buffer();
+    this->clear_output_buffer(false);
 
     QFile file(filename);
     if(!file.open(QIODevice::ReadOnly)) {

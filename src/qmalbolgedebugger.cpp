@@ -107,6 +107,9 @@ int QMalbolgeDebugger::execute_malbolge(QString filename) {
             last_jmp_destination_label = "somewhere in the initialization section";
             last_jmp_destination_label_offset = 0;
         }
+        if (current_step == steps_until_entry_point) {
+            this->flush_out_buffer();
+        }
         bool should_run = false;
         if (current_step < steps_until_entry_point) {
             should_run = true;
@@ -121,6 +124,7 @@ int QMalbolgeDebugger::execute_malbolge(QString filename) {
         if (!should_run) {
             if (has_been_running) {
                 has_been_running = false;
+                this->flush_out_buffer();
                 if (!pause_emitted) {
                     this->emit_pause_state();
                     reading_was_paused = false;
@@ -159,10 +163,13 @@ int QMalbolgeDebugger::execute_malbolge(QString filename) {
         }else if (entry_point_reached){
             last_jmp_destination_label_offset++;
         }
-        if (execution_step_result < 0)
+        if (execution_step_result < 0) {
+            this->clear_output_buffer(true);
+            this->flush_out_buffer();
             return execution_step_result; // ERROR
-        else if (execution_step_result > 0)
+        } else if (execution_step_result > 0) {
             break; // TERMINATED NORMALLY
+        }
 
         if (running_until_breakpoint) {
             bool breakpoint = false;
@@ -192,15 +199,22 @@ int QMalbolgeDebugger::execute_malbolge(QString filename) {
             }
         }
 
+        if (!running_until_breakpoint || current_step % 100000 == 0) {
+            this->flush_out_buffer();
+        }
+
         current_step++;
     }
     if (force_reset) {
+        this->flush_out_buffer();
         emit clear_userinput();
         clear_inputqueue();
         continue;
     }
     break;
     }while(1);
+    this->clear_output_buffer(true);
+    this->flush_out_buffer();
     return 0;
 }
 

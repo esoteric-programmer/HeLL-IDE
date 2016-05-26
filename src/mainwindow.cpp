@@ -281,8 +281,8 @@ void MainWindow::on_actionQuit_triggered() {
 }
 
 void MainWindow::on_actionAbout_triggered() {
-    QMessageBox::about(this, "About HeLL IDE", "HeLL IDE v0.1-pre\n\n"
-                       "(c) 2014, 2015 Matthias Ernst, released under GNU GPL v3.\n"
+    QMessageBox::about(this, "About HeLL IDE", "HeLL IDE v0.1\n\n"
+                       "(c) 2014-2016 Matthias Ernst, released under GNU GPL v3.\n"
                        "http://www.matthias-ernst.eu/malbolge.html\n"
                        "This software contains some code snippets of the qterminalwidget project, "
                        "which is (c) by simber86 and is released under GNU GPL v3, too.\n"

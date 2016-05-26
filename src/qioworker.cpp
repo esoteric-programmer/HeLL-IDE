@@ -88,8 +88,10 @@ int QIOWorker::run() {
 
     while(!this->should_terminate()) {
         char input;
-        if (this->in(input))
+        if (this->in(input)) {
             this->out(QString("I read: '").append(QString(input)).append("'.\n"));
+            this->flush_out_buffer();
+        }
     }
 
     return 0;
@@ -99,11 +101,23 @@ void QIOWorker::out(QString out) {
     emit StdOutWrite(out);
 }
 
+void QIOWorker::out_buffered(QString out) {
+    this->out_buffer.append(out);
+}
+void QIOWorker::flush_out_buffer() {
+    if (this->out_buffer.length() > 0) {
+        emit StdOutWrite(this->out_buffer);
+        this->out_buffer.clear();
+    }
+}
+
 void QIOWorker::info(QString out) {
+    this->flush_out_buffer();
     emit InfoWrite(out);
 }
 
 void QIOWorker::err(QString out) {
+    this->flush_out_buffer();
     emit StdErrWrite(out);
 }
 
@@ -117,6 +131,7 @@ void QIOWorker::clear_inputqueue() {
 
 bool QIOWorker::in(char& input, volatile bool *termination_flag) {
 
+    this->flush_out_buffer();
     while (1) {
 
         bool paused_notification_sent = false;
