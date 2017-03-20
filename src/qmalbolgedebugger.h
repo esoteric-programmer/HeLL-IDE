@@ -34,6 +34,7 @@ signals:
     void execution_paused(int first_line_d, int first_column_d, int last_line_d, int last_column_d, int first_line_c, int first_column_c, int last_line_c, int last_column_c, bool recommend_displaying_code_section);
     void registers_changed(QString c_label, QString mem_c_xlat, QString mem_d, QString a_reg_val);
     void runtime_expression_value_changed(QString value, int expression_id); // position_of_value may be -1. if not, it can be used to calculate xlat1...
+    void active_xlat2_changed(QLinkedList<LMAODebugInformations::SourcePosition>);
     void execution_continued();
     void query_breakpoints();
     void clear_userinput();

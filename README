@@ -32,4 +32,3 @@ Debugging:
   and arithmetic operations.
 - Press F10 to execute a single malbolge command (don't forget to enter input).
 - Press F5 to run until the next breakpoint.
-

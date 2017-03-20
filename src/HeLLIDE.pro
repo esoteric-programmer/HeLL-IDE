@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = hell-ide
 TEMPLATE = app
 
+QMAKE_CXXFLAGS += -fPIC
 
 SOURCES += main.cpp\
         mainwindow.cpp \

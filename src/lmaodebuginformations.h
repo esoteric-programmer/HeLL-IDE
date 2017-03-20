@@ -22,6 +22,8 @@
 
 #include <QObject>
 #include <QHash>
+#include <QLinkedList>
+#include <QMetaType>
 
 class LMAODebugInformations : public QObject
 {
@@ -54,6 +56,7 @@ public:
     int get_first_memory_cell_starting_at_line(int line, int &memory_cell, bool* is_inside_codesection);
     int get_steps_until_entry_point();
     bool get_address_label(int address, QString &label, bool &is_inside_codesection);
+    QLinkedList<SourcePosition> get_active_xlat2_positions(unsigned int memory[59050]);
 
 
 signals:
@@ -66,6 +69,8 @@ private:
     int steps_until_entry_point;
     QString hell_source_file;
     QString malbolge_file;
+    // list of: position, value => source position of this xlat2 cycle state
+    QLinkedList<QPair<QPair<int, char>, SourcePosition> > xlat2_in_source;
 
 };
 
