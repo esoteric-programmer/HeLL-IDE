@@ -1,7 +1,7 @@
 /*
  * This file is part of HeLL IDE, IDE for the low-level Malbolge
  * assembly language HeLL.
- * Copyright (C) 2013 Matthias Ernst
+ * Copyright (C) 2013 Matthias Lutter
  *
  * HeLL IDE is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,12 +39,14 @@ int LMAODebugInformations::read_from_file(QString filename) {
         SOURCEPOSITIONS = 2,
         EXECUTION_STEPS_UNTIL_ENTRY_POINT = 3,
         SOURCE_FILE = 4,
-        MALBOLGE_FILE = 5
+        MALBOLGE_FILE = 5,
+        XLAT2_CYCLES = 6
     } state = UNDEFINED;
 
     // clean up!
     labels_in_memory.clear();
     memory_cells_in_source.clear();
+    xlat2_in_source.clear();
     steps_until_entry_point = -1;
     hell_source_file = "";
     malbolge_file = "";
@@ -78,6 +80,8 @@ int LMAODebugInformations::read_from_file(QString filename) {
                 state = SOURCE_FILE;
             } else if (line == ":MALBOLGE_FILE:") {
                 state = MALBOLGE_FILE;
+            } else if (line == ":XLAT2:") {
+                state = XLAT2_CYCLES;
             } else{
                 state = UNDEFINED;
             }
@@ -137,6 +141,23 @@ int LMAODebugInformations::read_from_file(QString filename) {
             case MALBOLGE_FILE:
                 if (malbolge_file.length() <= 0)
                     malbolge_file = line;
+                break;
+            case XLAT2_CYCLES:
+                {
+                    QRegExp re(QString("^([0-9_]+) ([!-~]) ([0-9]+):([0-9]+) - ([0-9]+):([0-9]+)($|\\r|\\n)"));
+                    int match = re.indexIn(line);
+                    if (match >= 0) {
+                        int address = re.cap(1).toInt();
+                        char symbol = re.cap(2).data()->toAscii();
+                        SourcePosition source;
+                        source.type = source.CODE;
+                        source.first_line = re.cap(3).toInt();
+                        source.first_column = re.cap(4).toInt();
+                        source.last_line = re.cap(5).toInt();
+                        source.last_column = re.cap(6).toInt();
+                        xlat2_in_source.push_back(QPair<QPair<int,char>,SourcePosition>(QPair<int,char>(address, symbol),source));
+                    }
+                }
                 break;
             default:
                 break; // should not occur
@@ -246,4 +267,22 @@ int LMAODebugInformations::get_first_memory_cell_starting_at_line(int line, int 
 
 int LMAODebugInformations::get_steps_until_entry_point() {
     return steps_until_entry_point;
+}
+
+QLinkedList<LMAODebugInformations::SourcePosition> LMAODebugInformations::get_active_xlat2_positions(unsigned int memory[59050]) {
+    QLinkedList<SourcePosition> ret;
+    QPair<QPair<int, char>, SourcePosition> xlat2;
+    foreach (xlat2, xlat2_in_source) {
+        int mem_pos = xlat2.first.first;
+        if (mem_pos < 0 || mem_pos > 59048) {
+            continue;
+        }
+        if (memory[mem_pos]>127) {
+            continue;
+        }
+        if (memory[mem_pos] == (unsigned int)xlat2.first.second) {
+            ret.push_back(xlat2.second);
+        }
+    }
+    return ret;
 }

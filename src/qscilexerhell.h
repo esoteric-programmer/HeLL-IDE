@@ -1,7 +1,7 @@
 /*
  * This file is part of HeLL IDE, IDE for the low-level Malbolge
  * assembly language HeLL.
- * Copyright (C) 2013 Matthias Ernst
+ * Copyright (C) 2013 Matthias Lutter
  *
  * HeLL IDE is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 
 #include <Qsci/qsciscintilla.h>
 #include <Qsci/qscilexercustom.h>
+#include "lmaodebuginformations.h"
 
 #define SCI_FOLDLINE 2237
 #define SC_FOLDACTION_EXPAND 1
@@ -39,6 +40,7 @@ public:
     QString description(int style) const;
     QColor defaultColor(int style) const;
     QColor defaultPaper(int style) const;
+    QFont defaultFont(int style) const;
     const char* keywords(int set) const;
     bool eolFill(int style) const;
 
@@ -56,8 +58,13 @@ public:
         EntryLabel = 7,
         String = 8,
         Error = 9,
-        ReservedBlock = 10
+        ReservedBlock = 10,
+        ActiveXlat2 = 11
     };
+
+public slots:
+    void update_active_xlat2(QLinkedList<LMAODebugInformations::SourcePosition>);
+    void remove_active_xlat2();
 
 private:
     void styleWithRegexp(QString source, int source_offset, int style, QString regexp, int regnum, QString inner_regexp = "^[\\s\\S]*$", int inner_regnum = 0);
@@ -66,6 +73,7 @@ private:
 
     void style_line(const QString& line, int linestart, bool& inside_braces, bool& inside_multiline_comment, bool& contains_section_start, bool& contains_block_start, bool& inside_block_at_eol);
 
+    QLinkedList<LMAODebugInformations::SourcePosition> active_xlat2;
     /*void setLineState(int line, int value);
     int getLineState(int line);*/
     

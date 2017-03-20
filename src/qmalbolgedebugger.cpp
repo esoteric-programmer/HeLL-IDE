@@ -1,7 +1,7 @@
 /*
  * This file is part of HeLL IDE, IDE for the low-level Malbolge
  * assembly language HeLL.
- * Copyright (C) 2013 Matthias Ernst
+ * Copyright (C) 2013 Matthias Lutter
  *
  * HeLL IDE is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,6 @@ int QMalbolgeDebugger::execute_malbolge(QString filename) {
 
 
     do {
-
         execute_single_step = false;
         running_until_breakpoint = false;
         pause_emitted = false;
@@ -54,164 +53,164 @@ int QMalbolgeDebugger::execute_malbolge(QString filename) {
         set_can_read(true);
         breakpoints.clear();
 
-    QRegExp re(QString("[\\r\\n]Debug(ging)? information(s?) written to ([^\\r\\n]*)[\\r\\n]"));
-    int match = re.indexIn(this->child_process_stdout);
+        QRegExp re(QString("[\\r\\n]Debug(ging)? information(s?) written to ([^\\r\\n]*)[\\r\\n]"));
+        int match = re.indexIn(this->child_process_stdout);
 
-    QString debug_file;
-    if (match >= 0) {
-        debug_file = re.cap(3);
-    } else {
-        debug_file = this->debug_filename;
-        if (debug_file.length() <= 0) {
-            this->StdErrWrite("Cannot open file with debugging information.");
-            return -1;
-        }
-    }
-
-
-    this->info(QString("Debugging ").append(filename).append("...\n"));
-
-    int ret = load_malbolge_program(filename);
-    if (ret != 0)
-        return ret;
-
-    // Load debug informations
-    if (debug_infos.read_from_file(debug_file)<0) {
-        this->StdErrWrite("Cannot parse file with debugging information.");
-        return -1; // cannot read debug infos
-    }
-
-    //qDebug() << "Read debug infos.";
-
-    execute_single_step = false;
-    running_until_breakpoint = false;
-
-    int steps_until_entry_point = debug_infos.get_steps_until_entry_point();
-    bool entry_point_reached = false;
-    int current_step = 0;
-    last_jmp_destination_label = "(unknown)";
-    last_jmp_destination_label_offset = 0;
-
-    bool has_been_running = true;
-
-    emit query_breakpoints();
-
-    this->set_malbolge_started();
-
-    // execute program
-    while (!this->should_terminate() && !force_reset) {
-
-        if (current_step >= steps_until_entry_point) {
-            entry_point_reached = true;
-        }else{
-            last_jmp_destination_label = "somewhere in the initialization section";
-            last_jmp_destination_label_offset = 0;
-        }
-        if (current_step == steps_until_entry_point) {
-            this->flush_out_buffer();
-        }
-        bool should_run = false;
-        if (current_step < steps_until_entry_point) {
-            should_run = true;
-        }else if (running_until_breakpoint) {
-            // TODO: CHECK FOR BREAKPOINT!!!
-            should_run = true;
-        }else if (execute_single_step) {
-            execute_single_step = false;
-            should_run = true;
-        }
-
-        if (!should_run) {
-            if (has_been_running) {
-                has_been_running = false;
-                this->flush_out_buffer();
-                if (!pause_emitted) {
-                    this->emit_pause_state();
-                    reading_was_paused = false;
-                }
-
-            }
-            QCoreApplication::processEvents();
-            QSleep::msleep(20);
-            continue;
+        QString debug_file;
+        if (match >= 0) {
+            debug_file = re.cap(3);
         } else {
-            set_can_read(true);
+            debug_file = this->debug_filename;
+            if (debug_file.length() <= 0) {
+                this->StdErrWrite("Cannot open file with debugging information.");
+                return -1;
+            }
         }
 
-        if (pause_emitted) {
-            emit execution_continued();
-            //qDebug() << "CONTINUE EMITTED.";
-            pause_emitted = false;
+
+        this->info(QString("Debugging ").append(filename).append("...\n"));
+
+        int ret = load_malbolge_program(filename);
+        if (ret != 0)
+            return ret;
+
+        // Load debug informations
+        if (debug_infos.read_from_file(debug_file)<0) {
+            this->StdErrWrite("Cannot parse file with debugging information.");
+            return -1; // cannot read debug infos
         }
 
-        has_been_running = true;
-        QCoreApplication::processEvents();
-        if (!get_can_read()) {
-            continue; // seems that the state has been changed...
-        }
+        //qDebug() << "Read debug infos.";
 
-/*
-        if (entry_point_reached)
-            address_to_label
-            */
+        execute_single_step = false;
+        running_until_breakpoint = false;
 
-        int command;
-        int execution_step_result = execute_malbolge_step(command);
-        if (command == MALBOLGE_JMP && entry_point_reached) {
-            int inside_codesection = 1;
-            last_jmp_destination_label = address_to_label(c, inside_codesection, last_jmp_destination_label_offset);
-        }else if (entry_point_reached){
-            last_jmp_destination_label_offset++;
+        int steps_until_entry_point = debug_infos.get_steps_until_entry_point();
+        bool entry_point_reached = false;
+        int current_step = 0;
+        last_jmp_destination_label = "(unknown)";
+        last_jmp_destination_label_offset = 0;
+
+        bool has_been_running = true;
+
+        emit query_breakpoints();
+
+        this->set_malbolge_started();
+
+        // execute program
+        while (!this->should_terminate() && !force_reset) {
+
+            if (current_step >= steps_until_entry_point) {
+                entry_point_reached = true;
+            }else{
+                last_jmp_destination_label = "somewhere in the initialization section";
+                last_jmp_destination_label_offset = 0;
+            }
+            if (current_step == steps_until_entry_point) {
+                this->flush_out_buffer();
+            }
+            bool should_run = false;
+            if (current_step < steps_until_entry_point) {
+                should_run = true;
+            }else if (running_until_breakpoint) {
+                // TODO: CHECK FOR BREAKPOINT!!!
+                should_run = true;
+            }else if (execute_single_step) {
+                execute_single_step = false;
+                should_run = true;
+            }
+
+            if (!should_run) {
+                if (has_been_running) {
+                    has_been_running = false;
+                    this->flush_out_buffer();
+                    if (!pause_emitted) {
+                        this->emit_pause_state();
+                        reading_was_paused = false;
+                    }
+
+                }
+                QCoreApplication::processEvents();
+                QSleep::msleep(20);
+                continue;
+            } else {
+                set_can_read(true);
+            }
+
+            if (pause_emitted) {
+                emit execution_continued();
+                //qDebug() << "CONTINUE EMITTED.";
+                pause_emitted = false;
+            }
+
+            has_been_running = true;
+            QCoreApplication::processEvents();
+            if (!get_can_read()) {
+                continue; // seems that the state has been changed...
+            }
+
+    /*
+            if (entry_point_reached)
+                address_to_label
+                */
+
+            int command;
+            int execution_step_result = execute_malbolge_step(command);
+            if (command == MALBOLGE_JMP && entry_point_reached) {
+                int inside_codesection = 1;
+                last_jmp_destination_label = address_to_label(c, inside_codesection, last_jmp_destination_label_offset);
+            }else if (entry_point_reached){
+                last_jmp_destination_label_offset++;
+            }
+            if (execution_step_result < 0) {
+                this->clear_output_buffer(true);
+                this->flush_out_buffer();
+                return execution_step_result; // ERROR
+            } else if (execution_step_result > 0) {
+                break; // TERMINATED NORMALLY
+            }
+
+            if (running_until_breakpoint) {
+                bool breakpoint = false;
+                bool only_codesection_bp = true;
+                QHash<unsigned int, QPair<int, bool> >::iterator i = breakpoints.find(d);
+                while (i != breakpoints.end() && i.key() == d) {
+                    QPair<int, bool> bp = i.value();
+                    if (!bp.second) {
+                        breakpoint = true;
+                        only_codesection_bp = false;
+                    }
+                    i++;
+                }
+                i = breakpoints.find(c);
+                while (i != breakpoints.end() && i.key() == c) {
+                    QPair<int, bool> bp = i.value();
+                    if (bp.second) {
+                        breakpoint = true;
+                    }
+                    i++;
+                }
+                if (breakpoint) {
+                    running_until_breakpoint = false;
+                    if (only_codesection_bp) {
+                        recommend_goto_codesection_on_pause = true;
+                    }
+                }
+            }
+
+            if (!running_until_breakpoint || current_step % 100000 == 0) {
+                this->flush_out_buffer();
+            }
+
+            current_step++;
         }
-        if (execution_step_result < 0) {
-            this->clear_output_buffer(true);
+        if (force_reset) {
             this->flush_out_buffer();
-            return execution_step_result; // ERROR
-        } else if (execution_step_result > 0) {
-            break; // TERMINATED NORMALLY
+            emit clear_userinput();
+            clear_inputqueue();
+            continue;
         }
-
-        if (running_until_breakpoint) {
-            bool breakpoint = false;
-            bool only_codesection_bp = true;
-            QHash<unsigned int, QPair<int, bool> >::iterator i = breakpoints.find(d);
-            while (i != breakpoints.end() && i.key() == d) {
-                QPair<int, bool> bp = i.value();
-                if (!bp.second) {
-                    breakpoint = true;
-                    only_codesection_bp = false;
-                }
-                i++;
-            }
-            i = breakpoints.find(c);
-            while (i != breakpoints.end() && i.key() == c) {
-                QPair<int, bool> bp = i.value();
-                if (bp.second) {
-                    breakpoint = true;
-                }
-                i++;
-            }
-            if (breakpoint) {
-                running_until_breakpoint = false;
-                if (only_codesection_bp) {
-                    recommend_goto_codesection_on_pause = true;
-                }
-            }
-        }
-
-        if (!running_until_breakpoint || current_step % 100000 == 0) {
-            this->flush_out_buffer();
-        }
-
-        current_step++;
-    }
-    if (force_reset) {
-        this->flush_out_buffer();
-        emit clear_userinput();
-        clear_inputqueue();
-        continue;
-    }
-    break;
+        break;
     }while(1);
     this->clear_output_buffer(true);
     this->flush_out_buffer();
@@ -357,6 +356,7 @@ void QMalbolgeDebugger::emit_pause_state() {
         qDebug() << "Expression nr. " << idx << ": " << *i << " evaluated to "<<this->evaluate_runtime_expression(*i);
         emit runtime_expression_value_changed(this->evaluate_runtime_expression(*i), idx);
     }
+    emit active_xlat2_changed(debug_infos.get_active_xlat2_positions(memory));
 }
 
 QString QMalbolgeDebugger::d_mem() {
@@ -523,4 +523,3 @@ void QMalbolgeDebugger::remove_runtime_expression(int expression_id) {
 void QMalbolgeDebugger::clear_runtime_expressions() {
     runtime_expressions.clear();
 }
-

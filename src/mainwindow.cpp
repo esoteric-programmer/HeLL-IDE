@@ -1,7 +1,7 @@
 /*
  * This file is part of HeLL IDE, IDE for the low-level Malbolge
  * assembly language HeLL.
- * Copyright (C) 2013 Matthias Ernst
+ * Copyright (C) 2013 Matthias Lutter
  *
  * HeLL IDE is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    qRegisterMetaType<LMAODebugInformations::SourcePosition>("LMAODebugInformations::SourcePosition");
+    qRegisterMetaType<QLinkedList<LMAODebugInformations::SourcePosition> >("QLinkedList<LMAODebugInformations::SourcePosition>");
+
     QSettings application_settings;
     this->hell_file_name = application_settings.value("editor/lastfolder").toString();
     this->hell_filename_is_dir = true;
@@ -47,12 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->updateWindowsTitle();
 
-    QFont font("Courier", 12);
-    font.setFixedPitch(true);
-    ui->textEdit->setFont(font);
-
     QsciLexer *lexer = new QsciLexerHeLL();
-    lexer->setFont(ui->textEdit->font());
     ui->textEdit->setLexer(lexer);
     ui->textEdit->setFolding(QsciScintilla::PlainFoldStyle);
 
@@ -281,9 +279,9 @@ void MainWindow::on_actionQuit_triggered() {
 }
 
 void MainWindow::on_actionAbout_triggered() {
-    QMessageBox::about(this, "About HeLL IDE", "HeLL IDE v0.1\n\n"
-                       "(c) 2014-2016 Matthias Ernst, released under GNU GPL v3.\n"
-                       "http://www.matthias-ernst.eu/malbolge.html\n"
+    QMessageBox::about(this, "About HeLL IDE", "HeLL IDE v0.1.1\n\n"
+                       "(c) 2014-2017 Matthias Lutter, released under GNU GPL v3.\n"
+                       "https://lutter.cc/\n"
                        "This software contains some code snippets of the qterminalwidget project, "
                        "which is (c) by simber86 and is released under GNU GPL v3, too.\n"
                        "https://code.google.com/p/qterminalwidget/\n"
@@ -438,9 +436,6 @@ void MainWindow::on_actionStop_triggered() {
 
 
 void MainWindow::on_actionStart_triggered() {
-
-
-
     //if (this->ui->textEdit->SendScintilla(QsciScintilla::SCI_GETMODIFY)!=0) {
     this->on_actionSave_triggered();
     //}
@@ -491,8 +486,11 @@ void MainWindow::on_actionStart_triggered() {
     connect(this, SIGNAL(register_runtime_expression(QString, int)),(QMalbolgeDebugger*)execute, SLOT(register_runtime_expression(QString, int)));
     connect(this, SIGNAL(remove_runtime_expression(int)),(QMalbolgeDebugger*)execute, SLOT(remove_runtime_expression(int)));
     connect(this, SIGNAL(clear_runtime_expressions()),(QMalbolgeDebugger*)execute, SLOT(clear_runtime_expressions()));
+    connect(this, SIGNAL(clear_runtime_expressions()),(QMalbolgeDebugger*)execute, SLOT(clear_runtime_expressions()));
+    connect((QMalbolgeDebugger*)execute, SIGNAL(active_xlat2_changed(QLinkedList<LMAODebugInformations::SourcePosition>)), (QsciLexerHeLL*)ui->textEdit->lexer(), SLOT(update_active_xlat2(QLinkedList<LMAODebugInformations::SourcePosition>)));
+    connect((QMalbolgeDebugger*)execute, SIGNAL(execution_continued()), (QsciLexerHeLL*)ui->textEdit->lexer(), SLOT(remove_active_xlat2()));
+    connect((QMalbolgeDebugger*)execute, SIGNAL(Terminated(int,QProcess::ExitStatus)), (QsciLexerHeLL*)ui->textEdit->lexer(), SLOT(remove_active_xlat2()));
     this->ui->console->execute(execute, exec_message);
-
 }
 
 void MainWindow::query_breakpoints() {

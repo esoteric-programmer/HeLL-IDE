@@ -1,7 +1,7 @@
 /*
  * This file is part of HeLL IDE, IDE for the low-level Malbolge
  * assembly language HeLL.
- * Copyright (C) 2013 Matthias Ernst
+ * Copyright (C) 2013 Matthias Lutter
  *
  * HeLL IDE is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,12 +21,14 @@
 #include "qscilexerhell.h"
 #include <QRegExp>
 #include <QDebug>
-#include <QMessageBox>
 
 QsciLexerHeLL::QsciLexerHeLL(QObject *parent) :
     QsciLexerCustom(parent)
 {
     //this->setAutoIndentStyle(QsciScintilla::AiMaintain);
+    QFont font("Courier", 12);
+    font.setFixedPitch(true);
+    this->setDefaultFont(font);
 }
 
 QString QsciLexerHeLL::description(int style) const
@@ -54,6 +56,8 @@ QString QsciLexerHeLL::description(int style) const
             return "Syntax error";
     case ReservedBlock:
             return "Unused memory cell";
+    case ActiveXlat2:
+            return "Current Xlat2 cycle position";
     }
     return ""; //return QString(style);
 }
@@ -84,6 +88,7 @@ QColor QsciLexerHeLL::defaultColor(int style) const {
     case Number:
         return Qt::blue;
     case MemoryCell:
+    case ActiveXlat2:
         return Qt::darkYellow;
     case String:
         return Qt::darkGreen;
@@ -91,6 +96,15 @@ QColor QsciLexerHeLL::defaultColor(int style) const {
             return Qt::blue;
     }
     return Qt::black;
+}
+
+QFont QsciLexerHeLL::defaultFont(int style) const {
+    switch (style) {
+    case ActiveXlat2:
+        return QFont("Courier", 12, QFont::Bold);
+    default:
+        return QFont("Courier", 12);
+    }
 }
 
 bool QsciLexerHeLL::eolFill(int) const {
@@ -296,6 +310,28 @@ void QsciLexerHeLL::styleText(int start, int end){
             }
             this->editor()->SendScintilla(QsciScintilla::SCI_SETFOLDLEVEL, line_number-1, fold_level);
         }
+    {
+    LMAODebugInformations::SourcePosition pos;
+    foreach(pos, active_xlat2) {
+        if (pos.first_line <= 0)
+            pos.first_line = 1;
+        if (pos.first_column <= 0)
+            pos.first_column = 1;
+        if (pos.last_line <= 0)
+            pos.last_line = 1;
+        if (pos.last_column <= 0)
+            pos.last_column = 1;
+        int index_line_start = this->editor()->positionFromLineIndex(pos.first_line-1,0);
+        int index_line_end = this->editor()->positionFromLineIndex(pos.last_line-1,0);
+        int index = index_line_start + pos.first_column - 1;
+        int end_index = index_line_end + pos.last_column;
+        if (end_index > index && end_index <= end) {
+            startStyling(index);
+            int len = end_index - index;
+            setStyling(len, ActiveXlat2);
+        }
+    }
+    }
 }
 
 bool QsciLexerHeLL::is_empty_line(const QString& line) {
@@ -513,6 +549,15 @@ int QsciLexerHeLL::getLineState(int line) {
     return ret;
 }*/
 
+void QsciLexerHeLL::update_active_xlat2(QLinkedList<LMAODebugInformations::SourcePosition> xlat2) {
+    active_xlat2 = xlat2;
+    styleText(0,this->editor()->text().length());
+}
+
+void QsciLexerHeLL::remove_active_xlat2() {
+    active_xlat2 = QLinkedList<LMAODebugInformations::SourcePosition>();
+    styleText(0,this->editor()->text().length());
+}
 
 QsciLexerHeLL::~QsciLexerHeLL() {
 }
