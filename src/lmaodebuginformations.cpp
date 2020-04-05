@@ -148,7 +148,7 @@ int LMAODebugInformations::read_from_file(QString filename) {
                     int match = re.indexIn(line);
                     if (match >= 0) {
                         int address = re.cap(1).toInt();
-                        char symbol = re.cap(2).data()->toAscii();
+                        char symbol = re.cap(2).data()->toLatin1();
                         SourcePosition source;
                         source.type = source.CODE;
                         source.first_line = re.cap(3).toInt();

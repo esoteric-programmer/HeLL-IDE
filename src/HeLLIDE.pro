@@ -8,10 +8,8 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = hell-ide
-TEMPLATE = app
+CONFIG += c++11
 
-QMAKE_CXXFLAGS += -fPIC
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -56,9 +54,9 @@ greaterThan(QT_MAJOR_VERSION, 4) {
         LIBS += -Lqscintilla/Qt4Qt5 -lqscintilla2
     }
     !win32 {
-        LIBS += -lqt5scintilla2
+        LIBS += -lqscintilla2_qt5
     }
 }
 lessThan(QT_MAJOR_VERSION, 5) {
-    LIBS += -Lqscintilla/Qt4 -lqscintilla2
+    LIBS += -Lqscintilla/Qt4 -lqscintilla2_qt4
 }
