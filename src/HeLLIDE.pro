@@ -10,7 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
 
-QMAKE_CXXFLAGS += -fPIC
+TARGET = hell-ide
 
 SOURCES += main.cpp\
         mainwindow.cpp \

@@ -1,7 +1,7 @@
 /*
  * This file is part of HeLL IDE, IDE for the low-level Malbolge
  * assembly language HeLL.
- * Copyright (C) 2013 Matthias Lutter
+ * Copyright (C) 2013 Matthias Ernst
  *
  * HeLL IDE is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,7 +107,7 @@ bool MemoryCellParser::parse_expression(QString expression, unsigned int* malbol
         MemoryCellParser::malbolge_memory = 0;
         MemoryCellParser::debug_info = 0;
         return empty;
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error &) {
         MemoryCellParser::expression = QString();
         MemoryCellParser::malbolge_memory = 0;
         MemoryCellParser::debug_info = 0;
