@@ -1,7 +1,7 @@
 /*
  * This file is part of HeLL IDE, IDE for the low-level Malbolge
  * assembly language HeLL.
- * Copyright (C) 2013 Matthias Ernst
+ * Copyright (C) 2013 Matthias Lutter
  *
  * HeLL IDE is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -281,7 +281,7 @@ void MainWindow::on_actionQuit_triggered() {
 void MainWindow::on_actionAbout_triggered() {
     QMessageBox::about(this, "About HeLL IDE", "HeLL IDE v0.1.1\n\n"
                        "(c) 2014-2017 Matthias Lutter, released under GNU GPL v3.\n"
-                       "http://www.matthias-ernst.eu/malbolge.html\n"
+                       "https://lutter.cc/\n"
                        "This software contains some code snippets of the qterminalwidget project, "
                        "which is (c) by simber86 and is released under GNU GPL v3, too.\n"
                        "https://code.google.com/p/qterminalwidget/\n"

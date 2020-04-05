@@ -3,7 +3,7 @@
  * This file has originally been written by simber86
  * and released at https://code.google.com/p/qterminalwidget/
  *
- * This is a modified version by Matthias Ernst for use within HeLL IDE.
+ * This is a modified version by Matthias Lutter for use within HeLL IDE.
  * It has been modified initially at Nov 2, 2014.
  *
  * qterminalwidget and HeLL IDE are free software: you can redistribute them

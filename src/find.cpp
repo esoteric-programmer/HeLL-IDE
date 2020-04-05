@@ -1,7 +1,7 @@
 /*
  * This file is part of HeLL IDE, IDE for the low-level Malbolge
  * assembly language HeLL.
- * Copyright (C) 2013 Matthias Ernst
+ * Copyright (C) 2013 Matthias Lutter
  *
  * HeLL IDE is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
